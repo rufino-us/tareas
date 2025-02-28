@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tareas del Hogar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        .controles {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .tareas {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+        .usuario {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 15px;
+            width: 250px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .usuario h3 {
+            margin-top: 0;
+            text-align: center;
+        }
+        .usuario ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .usuario li {
+            margin-bottom: 10px;
+        }
+        .naranja { border-top: 5px solid #FFA500; }
+        .amarillo { border-top: 5px solid #FFFF00; }
+        .morado { border-top: 5px solid #800080; }
+        .rojo { border-top: 5px solid #FF0000; }
+        .estrella {
+            font-size: 24px;
+            color: gold;
+            display: none;
+            text-align: center;
+        }
+        .estrella.mostrar {
+            display: block;
+        }
+        #validarBtn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #validarBtn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tareas del Hogar</h1>
+    <div class="controles">
+        <label for="diaSelector">Selecciona el día:</label>
+        <select id="diaSelector">
+            <option value="lunes">Lunes</option>
+            <option value="martes">Martes</option>
+            <option value="miercoles">Miércoles</option>
+            <option value="jueves">Jueves</option>
+            <option value="viernes">Viernes</option>
+            <option value="sabado">Sábado</option>
+            <option value="domingo">Domingo</option>
+        </select>
+    </div>
+    <div id="tareasContainer" class="tareas"></div>
+    <button id="validarBtn">Validar Tareas del Día</button>
+
+    <script>
+        const tareasPorDia = {
+            lunes: {
+                mario: ["Poner mesa", "Baño", "Polvo salón"],
+                sofia: ["Pasillo", "Cepillar gato"],
+                nuria: ["Quitar mesa", "Habitación"],
+                rufino: []
+            },
+            martes: {
+                mario: ["Quitar mesa", "Fregar cocina", "Salón"],
+                sofia: ["Poner mesa", "Fregar pasillo", "Baño", "Cepillar gato"],
+                nuria: [],
+                rufino: []
+            },
+            miercoles: {
+                mario: ["Pasillo"],
+                sofia: ["Poner mesa", "Quitar mesa", "Salón (papelera)", "Cepillar gato"],
+                nuria: [],
+                rufino: []
+            },
+            jueves: {
+                mario: ["Pasillo", "Salón"],
+                sofia: ["Poner mesa", "Baño", "Cepillar gato"],
+                nuria: [],
+                rufino: []
+            },
+            viernes: {
+                mario: ["Poner mesa", "Quitar mesa", "Salón", "Puerta"],
+                sofia: ["Pasillo", "Baño", "Habitación", "Puerta", "Cepillar gato"],
+                nuria: [],
+                rufino: []
+            },
+            sabado: {
+                mario: ["Habitación", "Pasillo", "Baño (fregar)"],
+                sofia: ["Quitar mesa", "Habitación", "Cocina", "Salón (fregar)", "Cepillar gato", "Líquido del gato"],
+                nuria: [],
+                rufino: ["Poner mesa"]
+            },
+            domingo: {
+                mario: ["Salón", "Baño (papelera)"],
+                sofia: ["Pasillo", "Habitación", "Cepillar gato"],
+                nuria: ["Quitar mesa"],
+                rufino: ["Poner mesa"]
+            }
+        };
+
+        const coloresUsuarios = {
+            mario: "naranja",
+            sofia: "amarillo",
+            nuria: "morado",
+            rufino: "rojo"
+        };
+
+        function crearTareasDelDia(dia) {
+            const container = document.getElementById('tareasContainer');
+            container.innerHTML = '';
+
+            for (const [usuario, tareas] of Object.entries(tareasPorDia[dia])) {
+                if (tareas.length > 0) {
+                    const divUsuario = document.createElement('div');
+                    divUsuario.className = `usuario ${coloresUsuarios[usuario]}`;
+                    divUsuario.innerHTML = `
+                        <h3>${usuario.charAt(0).toUpperCase() + usuario.slice(1)}</h3>
+                        <ul>
+                            ${tareas.map((tarea, index) => `
+                                <li>
+                                    <input type="checkbox" id="${usuario}${index}">
+                                    <label for="${usuario}${index}">${tarea}</label>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="estrella">⭐</div>
+                    `;
+                    container.appendChild(divUsuario);
+                }
+            }
+
+            actualizarEventListeners();
+        }
+
+        function actualizarEventListeners() {
+            const usuarios = document.querySelectorAll('.usuario');
+
+            usuarios.forEach(function(usuario) {
+                const checkboxes = usuario.querySelectorAll('input[type="checkbox"]');
+                const estrella = usuario.querySelector('.estrella');
+
+                checkboxes.forEach(function(checkbox) {
+                    checkbox.addEventListener('change', function() {
+                        actualizarEstrella(usuario, checkboxes, estrella);
+                    });
+                });
+            });
+        }
+
+        function actualizarEstrella(usuario, checkboxes, estrella) {
+            const todasCompletas = Array.from(checkboxes).every(cb => cb.checked);
+            estrella.classList.toggle('mostrar', todasCompletas);
+        }
+
+        document.getElementById('diaSelector').addEventListener('change', function(e) {
+            crearTareasDelDia(e.target.value);
+        });
+
+        document.getElementById('validarBtn').addEventListener('click', function() {
+            const diaActual = document.getElementById('diaSelector').value;
+            const usuarios = document.querySelectorAll('.usuario');
+            let todasCompletadas = true;
+
+            usuarios.forEach(function(usuario) {
+                const checkboxes = usuario.querySelectorAll('input[type="checkbox"]');
+                const todasCompletadasUsuario = Array.from(checkboxes).every(cb => cb.checked);
+                if (!todasCompletadasUsuario) {
+                    todasCompletadas = false;
+                }
+            });
+
+            if (todasCompletadas) {
+                alert(`Todas las tareas del ${diaActual} han sido completadas y validadas.`);
+            } else {
+                alert(`Aún hay tareas pendientes para el ${diaActual}.`);
+            }
+        });
+
+        // Inicializar con el día actual
+        const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+        const diaActual = diasSemana[new Date().getDay()];
+        document.getElementById('diaSelector').value = diaActual;
+        crearTareasDelDia(diaActual);
+    </script>
+</body>
+</html>
